@@ -87,7 +87,7 @@ module.exports.default = async function handler(req, res) {
 
 function parseUpload(req) {
   return new Promise((resolve, reject) => {
-    const form = typeof formidable === 'function' ? formidable({ maxFileSize: 10 * 1024 * 1024 }) : new formidable.IncomingForm({ maxFileSize: 10 * 1024 * 1024 });
+    const form = new formidable.IncomingForm({ maxFileSize: 10 * 1024 * 1024 });
     form.parse(req, (err, _fields, files) => {
       if (err) return reject(err);
       const file = files.image?.[0] || files.image;
@@ -154,46 +154,57 @@ async function reconstructWithVisionAI(buffer, mimetype) {
   const base64 = buffer.toString('base64');
   const apiKey = process.env.OPENROUTER_API_KEY;
 
+  // 1️⃣ التأكد من وجود الـ Key
   if (!apiKey) {
-    throw new Error('OPENROUTER_API_KEY is not defined');
+    console.error('❌ OPENROUTER_API_KEY is missing in Environment Variables!');
+    throw new Error('OPENROUTER_API_KEY is missing');
   }
 
-  const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'HTTP-Referer': 'https://picdecoder.com',
-      'X-Title': 'PicDecoder',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      model: 'google/gemini-2.0-flash-exp:free', // موديل مجاني وداعم للصور بامتياز
-      messages: [
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'text',
-              text: 'Write a single detailed AI image generation prompt (subject, composition, lighting, style) to recreate this image.'
-            },
-            {
-              type: 'image_url',
-              image_url: {
-                url: `data:${mimetype};base64,${base64}`
+  console.log('🚀 Sending image to OpenRouter...');
+
+  try {
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'HTTP-Referer': 'https://picdecoder.com',
+        'X-Title': 'PicDecoder',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'google/gemini-2.0-flash-exp:free',
+        messages: [
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'text',
+                text: 'Write a single detailed AI image generation prompt (subject, composition, lighting, style) to recreate this image.'
+              },
+              {
+                type: 'image_url',
+                image_url: {
+                  url: `data:${mimetype};base64,${base64}`
+                }
               }
-            }
-          ]
-        }
-      ]
-    })
-  });
+            ]
+          }
+        ]
+      })
+    });
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    console.error('OpenRouter Error:', errorData);
-    throw new Error('Vision analysis failed');
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error('❌ OpenRouter API Response Error:', data);
+      throw new Error(data.error?.message || 'OpenRouter vision analysis failed');
+    }
+
+    console.log('✅ Prompt generated successfully!');
+    return data.choices[0]?.message?.content || '';
+
+  } catch (err) {
+    console.error('❌ Error during OpenRouter fetch:', err.message);
+    throw err;
   }
-
-  const data = await response.json();
-  return data.choices[0]?.message?.content || '';
 }
