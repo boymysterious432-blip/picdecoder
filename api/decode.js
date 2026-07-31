@@ -87,7 +87,7 @@ module.exports.default = async function handler(req, res) {
 
 function parseUpload(req) {
   return new Promise((resolve, reject) => {
-    const form = formidable({ maxFileSize: 10 * 1024 * 1024 });
+    const form = typeof formidable === 'function' ? formidable({ maxFileSize: 10 * 1024 * 1024 }) : new formidable.IncomingForm({ maxFileSize: 10 * 1024 * 1024 });
     form.parse(req, (err, _fields, files) => {
       if (err) return reject(err);
       const file = files.image?.[0] || files.image;
