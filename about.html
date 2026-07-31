@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About PicDecoder</title>
+<meta name="description" content="How PicDecoder extracts prompts from AI-generated images: real embedded metadata first, AI reconstruction as a fallback.">
+<link rel="canonical" href="https://www.picdecoder.com/about.html">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a href="/" class="logo"><span class="dot"></span>PicDecoder</a>
+  <nav class="site-nav"><a href="/">Decoder</a><a href="/library.html">Prompt Library</a><a href="/about.html" class="active">About</a></nav>
+</header>
+<main class="container" style="max-width:680px;padding-top:40px;padding-bottom:60px;">
+  <h1>How PicDecoder actually works</h1>
+  <p>PicDecoder tries two things, in order, and always tells you which one produced your result:</p>
+
+  <h3>1. Reading the file's own metadata (exact)</h3>
+  <p>Tools like Automatic1111, ComfyUI and most Stable Diffusion front-ends save the prompt, negative prompt, seed and sampler settings directly inside the PNG file. If that data is present, PicDecoder reads it as-is — this is <strong>not</strong> a guess. You'll see a <span class="pill verified" style="display:inline;">✓ verified</span> badge.</p>
+
+  <h3>2. AI reconstruction (approximate)</h3>
+  <p>Many images — especially anything downloaded from Discord, Instagram or a screenshot — have that metadata stripped out. When there's nothing embedded to read, PicDecoder sends the image to a vision AI model, which describes the subject, composition, lighting and style and writes a plausible prompt. It's a strong starting point for recreating a similar look, not a guarantee of the exact original text. You'll see a <span class="pill reconstructed" style="display:inline;">✦ reconstructed</span> badge.</p>
+
+  <h3>Your images</h3>
+  <p>Uploaded images are stored only to generate your result page and are not sold or shared with third parties for advertising.</p>
+</main>
+<footer class="site-footer"><div class="container"><span>© 2026 PicDecoder</span><span><a href="/privacy.html">Privacy</a></span></div></footer>
+</body>
+</html>

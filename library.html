@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prompt Library — Real AI Image Prompts | PicDecoder</title>
+<meta name="description" content="Browse real prompts extracted from AI-generated images, with the model, seed and settings for each one.">
+<link rel="canonical" href="https://www.picdecoder.com/library.html">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a href="/" class="logo"><span class="dot"></span>PicDecoder</a>
+  <nav class="site-nav">
+    <a href="/">Decoder</a>
+    <a href="/library.html" class="active">Prompt Library</a>
+    <a href="/about.html">About</a>
+  </nav>
+</header>
+<main class="container">
+  <section class="hero" style="padding-bottom:0;">
+    <div class="eyebrow">Prompt Library</div>
+    <h1 style="font-size:2rem;">Real prompts, decoded from real images.</h1>
+    <p>Every card below is a page of its own — open one to see the full prompt, model and settings.</p>
+  </section>
+  <div id="grid" class="grid"><p style="color:var(--ink-soft);">Loading…</p></div>
+  <div style="text-align:center;margin:34px 0;">
+    <button id="loadMore" class="btn secondary" style="display:none;">Load more</button>
+  </div>
+</main>
+<footer class="site-footer"><div class="container"><span>© 2026 PicDecoder</span><span><a href="/about.html">About</a> · <a href="/privacy.html">Privacy</a></span></div></footer>
+
+<script>
+let page = 1, loading = false;
+const grid = document.getElementById('grid');
+const loadMoreBtn = document.getElementById('loadMore');
+
+async function loadPage(p){
+  loading = true;
+  const res = await fetch(`/api/prompts?page=${p}`);
+  const data = await res.json();
+  if (p === 1) grid.innerHTML = '';
+  if (!data.prompts || data.prompts.length === 0) {
+    if (p === 1) grid.innerHTML = '<p style="color:var(--ink-soft);">No prompts yet — be the first to decode one on the homepage.</p>';
+    loadMoreBtn.style.display = 'none';
+    loading = false;
+    return;
+  }
+  for (const item of data.prompts) {
+    const a = document.createElement('a');
+    a.href = `/prompt/${item.slug}`;
+    a.className = 'card';
+    a.innerHTML = `<img src="${item.image_url}" alt="" loading="lazy">
+      <div class="card-body"><div class="card-prompt">${escapeHtml(item.prompt_text)}</div></div>`;
+    grid.appendChild(a);
+  }
+  loadMoreBtn.style.display = (p * data.pageSize < data.total) ? 'inline-flex' : 'none';
+  loading = false;
+}
+
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+loadMoreBtn.addEventListener('click', () => { if (!loading) loadPage(++page); });
+loadPage(1);
+</script>
+</body>
+</html>

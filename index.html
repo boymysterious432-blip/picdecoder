@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PicDecoder | Free AI Image Prompt Extractor & Finder</title>
+<meta name="description" content="Upload any AI-generated image and PicDecoder reveals its prompt for free. Reads exact embedded metadata from Midjourney, Stable Diffusion and DALL·E files when present, or reconstructs an approximate prompt with AI when it isn't. No sign-up required.">
+<link rel="canonical" href="https://www.picdecoder.com/">
+<meta property="og:title" content="PicDecoder | Extract Prompts From Any AI Image Instantly">
+<meta property="og:description" content="Upload any AI image and uncover its prompt, model and settings — free, no account needed.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.picdecoder.com/">
+<meta property="og:site_name" content="PicDecoder">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="/style.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to extract the prompt from an AI-generated image",
+  "step": [
+    { "@type": "HowToStep", "text": "Upload an AI-generated image (Midjourney, Stable Diffusion, DALL·E, Flux, Leonardo)." },
+    { "@type": "HowToStep", "text": "PicDecoder first checks the file for embedded generation metadata." },
+    { "@type": "HowToStep", "text": "If no metadata exists, PicDecoder uses a vision AI model to reconstruct an approximate prompt from the image itself." },
+    { "@type": "HowToStep", "text": "Copy the prompt and reuse it in your preferred AI image generator." }
+  ]
+}
+</script>
+</head>
+<body>
+
+<header class="site-header">
+  <a href="/" class="logo"><span class="dot"></span>PicDecoder</a>
+  <nav class="site-nav">
+    <a href="/" class="active">Decoder</a>
+    <a href="/library.html">Prompt Library</a>
+    <a href="/about.html">About</a>
+  </nav>
+</header>
+
+<main class="container">
+  <section class="hero">
+    <div class="eyebrow">Free · No account needed</div>
+    <h1>Reverse-engineer any AI image into its prompt.</h1>
+    <p>Drop in an image and PicDecoder tells you how it was likely made — reading the file's own generation data when it's there, and reconstructing an approximate prompt with AI when it isn't.</p>
+
+    <div id="dropzone" class="dropzone">
+      <input type="file" id="fileInput" accept="image/png,image/jpeg,image/webp">
+      <div id="dzContent">
+        <div class="dz-title">Click to upload or drag & drop</div>
+        <div class="dz-sub">PNG, JPG or WEBP · processed in memory, never stored permanently</div>
+      </div>
+    </div>
+
+    <div style="margin-top:14px;">
+      <button id="extractBtn" class="btn" disabled>Extract Prompt</button>
+    </div>
+
+    <div id="resultWrap"></div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <span>© 2026 PicDecoder</span>
+    <span><a href="/about.html">About</a> · <a href="/privacy.html">Privacy</a></span>
+  </div>
+</footer>
+
+<script src="/decoder.js"></script>
+</body>
+</html>
