@@ -152,36 +152,48 @@ function parseA1111Text(text) {
 
 async function reconstructWithVisionAI(buffer, mimetype) {
   const base64 = buffer.toString('base64');
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
+  const apiKey = process.env.OPENROUTER_API_KEY;
+
+  if (!apiKey) {
+    throw new Error('OPENROUTER_API_KEY is not defined');
+  }
+
+  const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',
     headers: {
-      'content-type': 'application/json',
-      'x-api-key': process.env.ANTHROPIC_API_KEY,
-      'anthropic-version': '2023-06-01'
+      'Authorization': `Bearer ${apiKey}`,
+      'HTTP-Referer': 'https://picdecoder.com',
+      'X-Title': 'PicDecoder',
+      'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 500,
-      messages: [{
-        role: 'user',
-        content: [
-          { type: 'image', source: { type: 'base64', media_type: mimetype, data: base64 } },
-          {
-            type: 'text',
-            text: 'Write a single detailed AI-image-generation prompt (subject, composition, lighting, color palette, style, camera/art terms) that could reproduce this image in Midjourney or Stable Diffusion. Also guess which tool most likely generated it. Respond ONLY as JSON: {"prompt": "...", "likelyModel": "midjourney|stable-diffusion|dalle|flux|unknown"}'
-          }
-        ]
-      }]
+      model: 'google/gemini-2.0-flash-exp:free', // موديل مجاني وداعم للصور بامتياز
+      messages: [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'text',
+              text: 'Write a single detailed AI image generation prompt (subject, composition, lighting, style) to recreate this image.'
+            },
+            {
+              type: 'image_url',
+              image_url: {
+                url: `data:${mimetype};base64,${base64}`
+              }
+            }
+          ]
+        }
+      ]
     })
   });
 
-  if (!response.ok) throw new Error('Vision analysis failed');
-  const data = await response.json();
-  const text = (data.content || []).map(b => b.text || '').join('');
-  const clean = text.replace(/```json|```/g, '').trim();
-  try {
-    return JSON.parse(clean);
-  } catch {
-    return { prompt: text.trim(), likelyModel: 'unknown' };
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    console.error('OpenRouter Error:', errorData);
+    throw new Error('Vision analysis failed');
   }
+
+  const data = await response.json();
+  return data.choices[0]?.message?.content || '';
 }
